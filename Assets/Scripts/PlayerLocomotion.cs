@@ -18,18 +18,50 @@ public class PlayerLocomotion : MonoBehaviour
     [Header("Stats")] 
     [SerializeField] private float movementSpeed = 5;
 
-    [SerializeField] private float rotationSpeed = 10;
+    [SerializeField] private float rotationSpeed = 12f;
 
     private void Start()
     {
         rigidbody = GetComponent<Rigidbody>();
         inputHandler = GetComponent<InputHandler>();
+        animatorHandler = GetComponent<AnimatorHandler>();
         cameraObject = Camera.main.transform;
         myTransform = transform;
+        animatorHandler.Initialize();
+    }
+
+    private float time;
+    private void Update()
+    {
+        float delta = Time.deltaTime;
+        inputHandler.TickInput(delta);
+
+        moveDirection = cameraObject.forward * inputHandler.vertical;
+        moveDirection += cameraObject.right * inputHandler.horizontal;
+        moveDirection.Normalize();
+
+        moveDirection *= movementSpeed;
+        Vector3 projectVelocity = Vector3.ProjectOnPlane(moveDirection, normalVector);
+        //Debug.Log(moveDirection + " " + projectVelocity);
+        rigidbody.velocity = projectVelocity;
+
+        animatorHandler.UpdateAnimatorValues(0, inputHandler.moveAmount);
+        if (inputHandler.moveAmount > 0.95)
+        {
+            Debug.Log(time);
+        }
+
+        time += Time.deltaTime;
+        if (animatorHandler.canRotate)
+        {
+            HandleRotation(delta);
+        }
     }
 
     #region Movement
 
+    private Vector3 normalVector;
+    private Vector3 targetPosition;
     private void HandleRotation(float delta)
     {
         Vector3 targetDir = Vector3.zero;
@@ -39,9 +71,10 @@ public class PlayerLocomotion : MonoBehaviour
 
         targetDir.Normalize();
         targetDir.y = 0;
-
+        
         if (targetDir == Vector3.zero)
             targetDir = myTransform.forward;
+        
         float rs = rotationSpeed;
         Quaternion tr = Quaternion.LookRotation(targetDir);
         Quaternion current = Quaternion.Slerp(myTransform.rotation, tr, rs * delta);

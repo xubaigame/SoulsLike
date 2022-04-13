@@ -19,6 +19,7 @@ public class InputHandler : MonoBehaviour
     {
         if (inputActions == null)
         {
+            Debug.Log("输入监听事件注册成功");
             inputActions = new PlayerContols();
             inputActions.PlayerMovement.Movement.performed += context => movementInput = context.ReadValue<Vector2>();
             inputActions.PlayerMovement.Camera.performed += context => cameraInput = context.ReadValue<Vector2>();
