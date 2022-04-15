@@ -27,6 +27,7 @@ public class PlayerLocomotion : MonoBehaviour
         animatorHandler = GetComponent<AnimatorHandler>();
         cameraObject = Camera.main.transform;
         myTransform = transform;
+        inputHandler.Initialize();
         animatorHandler.Initialize();
     }
 
